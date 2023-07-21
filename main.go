@@ -1,10 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/configuration"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/controller"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/exception"
+	repository "github.com/maxthizeau/gofiber-clean-boilerplate/repository/impl"
+	service "github.com/maxthizeau/gofiber-clean-boilerplate/service/impl"
 )
 
 func main() {
@@ -12,5 +16,21 @@ func main() {
 	config := configuration.New()
 	database := configuration.NewDatabase(config)
 
-	fmt.Println(database)
+	// repository
+	userRepository := repository.NewUserRepositoryImpl(database)
+
+	// service
+	userService := service.NewUserServiceImpl(&userRepository)
+
+	// controller
+	userController := controller.NewUserController(&userService, config)
+
+	// fiber
+	app := fiber.New(configuration.NewFiberConfiguration())
+
+	// route
+	userController.Route(app)
+
+	err := app.Listen(config.Get("SERVER.PORT"))
+	exception.PanicLogging(err)
 }
