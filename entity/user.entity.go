@@ -1,14 +1,20 @@
 package entity
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type User struct {
-	Id        uuid.UUID  `gorm:"primaryKey;column:user_id;type:varchar(36)"`
-	Username  string     `gorm:"index;column:username;type:varchar(100)"`
-	Email     string     `gorm:"column:email"`
-	Password  string     `gorm:"column:password;type:varchar(200)"`
-	IsActive  bool       `gorm:"column:is_active;type:boolean"`
+	Id        uuid.UUID `gorm:"primaryKey;column:user_id;type:varchar(36)"`
+	Username  string    `gorm:"index;column:username;type:varchar(100)"`
+	Email     string    `gorm:"column:email"`
+	Password  string    `gorm:"column:password;type:varchar(200)"`
+	IsActive  bool      `gorm:"column:is_active;type:boolean"`
+	CreatedAt time.Time
 	UserRoles []UserRole `gorm:"ForeignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Games     []*Game    `gorm:"many2many:user_games;"`
 }
 
 func (User) TableName() string {

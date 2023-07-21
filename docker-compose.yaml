@@ -5,13 +5,13 @@ services:
     restart: always
     container_name: gorm
     ports:
-      - '${DB_PORT}:5432'
+      - '${DATASOURCE_PORT}:5432'
     volumes:
       - ./data/postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME} 
+      POSTGRES_USER: ${DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
+      POSTGRES_DB: ${DATASOURCE_DB_NAME} 
   pgadmin:
     image: dpage/pgadmin4
     restart: always
