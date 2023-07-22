@@ -7,7 +7,7 @@ import (
 )
 
 type Question struct {
-	Id            uuid.UUID `gorm:"primaryKey;column:game_id;type:varchar(36)"`
+	Id            uuid.UUID `gorm:"primaryKey;column:game_id;type:uuid;default:gen_random_uuid()"`
 	CreatedAt     time.Time
 	Games         []*Game  `gorm:"many2many:game_questions;"`
 	CorrectAnswer Answer   `gorm:"ForeignKey:QuestionId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`

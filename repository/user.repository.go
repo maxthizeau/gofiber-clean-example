@@ -8,6 +8,6 @@ import (
 
 type UserRepository interface {
 	// Authentication(ctx context.Context, username string) (entity.User, error)
-	Create(username string, password string, roles []string) entity.User
+	Create(username string, password string, email string, roles []string) entity.User
 	FindAll(ctx context.Context) []entity.User
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Answer struct {
-	Id         uuid.UUID `gorm:"primaryKey;column:game_id;type:varchar(36)"`
+	Id         uuid.UUID `gorm:"primaryKey;column:game_id;type:uuid;default:gen_random_uuid()"`
 	CreatedAt  time.Time
 	QuestionId uuid.UUID
 	IsCorrect  bool

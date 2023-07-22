@@ -3,7 +3,7 @@ package impl
 import (
 	"context"
 
-	model "github.com/maxthizeau/gofiber-clean-boilerplate/models"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/model"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/repository"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/service"
 )
@@ -21,7 +21,7 @@ func (serv *userServiceImpl) FindAll(ctx context.Context) (responses []model.Use
 	for _, user := range users {
 		responses = append(responses, model.UserModel{
 			Username: user.Username,
-			Password: user.Password,
+			Email:    user.Email,
 		})
 	}
 
@@ -32,9 +32,15 @@ func (serv *userServiceImpl) FindAll(ctx context.Context) (responses []model.Use
 	return responses
 }
 
-func (serv *userServiceImpl) SignUp(ctx context.Context, userModel model.UserModel) model.UserModel {
+func (serv *userServiceImpl) SignUp(ctx context.Context, authModel model.UserAuthenticationModel) model.AuthModel {
 	roles := []string{"member"}
-	serv.UserRepository.Create(userModel.Username, userModel.Password, roles)
+	user := serv.UserRepository.Create(authModel.Username, authModel.Password, authModel.Email, roles)
 
-	return userModel
+	return model.AuthModel{
+		User: model.UserModel{
+			Username: user.Username,
+			Email:    user.Email,
+		},
+		Token: "token todo",
+	}
 }

@@ -20,7 +20,7 @@ func NewUserRepositoryImpl(DB *gorm.DB) repository.UserRepository {
 	}
 }
 
-func (repo *userRepositoryImpl) Create(username string, password string, roles []string) entity.User {
+func (repo *userRepositoryImpl) Create(username string, password string, email string, roles []string) entity.User {
 	var userRoles []entity.UserRole
 
 	for _, r := range roles {
@@ -33,6 +33,7 @@ func (repo *userRepositoryImpl) Create(username string, password string, roles [
 	user := entity.User{
 		Username:  username,
 		Password:  password,
+		Email:     email,
 		IsActive:  true,
 		UserRoles: userRoles,
 	}

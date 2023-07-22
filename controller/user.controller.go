@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/configuration"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/exception"
-	model "github.com/maxthizeau/gofiber-clean-boilerplate/models"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/model"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/service"
 )
 
@@ -23,7 +23,7 @@ func (controller UserController) Route(app *fiber.App) {
 }
 
 func (controller UserController) SignUp(c *fiber.Ctx) error {
-	var request model.UserModel
+	var request model.UserAuthenticationModel
 	err := c.BodyParser(&request)
 	exception.PanicLogging(err)
 

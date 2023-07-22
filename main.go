@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+
 	"github.com/maxthizeau/gofiber-clean-boilerplate/configuration"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/controller"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/exception"
@@ -27,6 +29,7 @@ func main() {
 
 	// fiber
 	app := fiber.New(configuration.NewFiberConfiguration())
+	app.Use(recover.New())
 
 	// route
 	userController.Route(app)
