@@ -8,5 +8,5 @@ import (
 
 type UserService interface {
 	FindAll(ctx context.Context) (responses []model.UserModel)
-	SignUp(ctx context.Context, authModel model.UserAuthenticationModel) model.AuthModel
+	SignUp(ctx context.Context, authModel model.UserSignupModel) model.AuthModel
 }

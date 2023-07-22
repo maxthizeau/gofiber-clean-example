@@ -23,7 +23,7 @@ func (controller UserController) Route(app *fiber.App) {
 }
 
 func (controller UserController) SignUp(c *fiber.Ctx) error {
-	var request model.UserAuthenticationModel
+	var request model.UserSignupModel
 	err := c.BodyParser(&request)
 	exception.PanicLogging(err)
 

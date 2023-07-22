@@ -24,7 +24,7 @@ func main() {
 	// answerRepository := repository.NewAnswerRepositoryImpl(database)
 
 	// service
-	userService := service.NewUserServiceImpl(&userRepository)
+	userService := service.NewUserServiceImpl(&userRepository, config)
 	questionService := service.NewQuestionServiceImpl(&questionRepository)
 
 	// controller

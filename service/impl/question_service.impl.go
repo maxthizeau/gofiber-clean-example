@@ -3,8 +3,10 @@ package impl
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/common"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/entity"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/exception"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/model"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/repository"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/service"
@@ -20,7 +22,7 @@ func NewQuestionServiceImpl(questionRepository *repository.QuestionRepository) s
 	}
 }
 
-func (serv *questionServiceImpl) Create(ctx context.Context, createQuestionModel model.CreateQuestionModel) model.QuestionModel {
+func (serv *questionServiceImpl) Create(ctx context.Context, createQuestionModel model.CreateQuestionModel, userId uuid.UUID) entity.Question {
 	common.Validate(createQuestionModel)
 
 	wrongAnswersEntities := []entity.Answer{}
@@ -36,27 +38,17 @@ func (serv *questionServiceImpl) Create(ctx context.Context, createQuestionModel
 		Label:         createQuestionModel.Label,
 		CorrectAnswer: entity.Answer{Label: createQuestionModel.CorrectAnswer, IsCorrect: true},
 		WrongAnswers:  wrongAnswersEntities,
+		CreatedById:   userId,
 	})
 
-	wrongAnswers := []model.AnswerModel{}
+	return question
+}
 
-	for _, a := range question.WrongAnswers {
-		wrongAnswers = append(wrongAnswers, model.AnswerModel{
-			Id:         a.Id,
-			QuestionId: a.QuestionId,
-			Label:      a.Label,
-			IsCorrect:  a.IsCorrect,
-		})
-	}
+func (serv *questionServiceImpl) GetQuestion(ctx context.Context, id string) entity.Question {
 
-	return model.QuestionModel{
-		Id:    question.Id,
-		Label: question.Label,
-		CorrectAnswer: model.AnswerModel{
-			Id:         question.CorrectAnswer.QuestionId,
-			QuestionId: question.CorrectAnswer.QuestionId,
-			IsCorrect:  question.CorrectAnswer.IsCorrect,
-		},
-		WrongAnswers: wrongAnswers,
-	}
+	question, err := serv.QuestionRepository.FindById(ctx, uuid.MustParse(id))
+
+	exception.PanicLogging(err)
+
+	return question
 }

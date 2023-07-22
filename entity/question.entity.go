@@ -12,7 +12,7 @@ type Question struct {
 	CorrectAnswer Answer    `gorm:"ForeignKey:QuestionId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	WrongAnswers  []Answer  `gorm:"ForeignKey:QuestionId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	CreatedById   uuid.UUID `gorm:"column:created_by;type:uuid"`
-	CreatedBy     User
+	CreatedBy     User      `gorm:"ForeignKey:CreatedById"`
 	Games         []Game    `gorm:"many2many:game_questions;"`
 	CreatedAt     time.Time `gorm:"column:created_at"`
 }
