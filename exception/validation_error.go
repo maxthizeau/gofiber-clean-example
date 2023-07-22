@@ -7,3 +7,11 @@ type ValidationError struct {
 func (validationError ValidationError) Error() string {
 	return validationError.Message
 }
+
+func PanicValidation(err error) {
+	if err != nil {
+		panic(ValidationError{
+			Message: err.Error(),
+		})
+	}
+}

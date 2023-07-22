@@ -20,12 +20,16 @@ func main() {
 
 	// repository
 	userRepository := repository.NewUserRepositoryImpl(database)
+	questionRepository := repository.NewQuestionRepositoryImpl(database)
+	// answerRepository := repository.NewAnswerRepositoryImpl(database)
 
 	// service
 	userService := service.NewUserServiceImpl(&userRepository)
+	questionService := service.NewQuestionServiceImpl(&questionRepository)
 
 	// controller
 	userController := controller.NewUserController(&userService, config)
+	questionController := controller.NewQuestionController(&questionService, config)
 
 	// fiber
 	app := fiber.New(configuration.NewFiberConfiguration())
@@ -33,6 +37,7 @@ func main() {
 
 	// route
 	userController.Route(app)
+	questionController.Route(app)
 
 	err := app.Listen(config.Get("SERVER.PORT"))
 	exception.PanicLogging(err)

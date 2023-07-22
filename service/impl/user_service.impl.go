@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 
+	"github.com/maxthizeau/gofiber-clean-boilerplate/common"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/model"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/repository"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/service"
@@ -33,6 +34,8 @@ func (serv *userServiceImpl) FindAll(ctx context.Context) (responses []model.Use
 }
 
 func (serv *userServiceImpl) SignUp(ctx context.Context, authModel model.UserAuthenticationModel) model.AuthModel {
+
+	common.Validate(authModel)
 	roles := []string{"member"}
 	user := serv.UserRepository.Create(authModel.Username, authModel.Password, authModel.Email, roles)
 

@@ -7,3 +7,11 @@ type UnauthorizedError struct {
 func (unauthorizedError UnauthorizedError) Error() string {
 	return unauthorizedError.Message
 }
+
+func PanicUnauthorized(err error) {
+	if err != nil {
+		panic(UnauthorizedError{
+			Message: err.Error(),
+		})
+	}
+}
