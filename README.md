@@ -19,7 +19,11 @@ Todo :
 - Websocket on game start
 - AWS S3 for images
 
-I used the excellent work of RizkiMufrizal (https://github.com/RizkiMufrizal/gofiber-clean-architecture) but I wanted to rewrite each part to fully understand the structure, the code and adapt it to my needs.
+# Inspirations
+
+- https://github.com/RizkiMufrizal/gofiber-clean-architecture
+- https://github.com/Creatly/creatly-backend/
+-
 
 # API
 

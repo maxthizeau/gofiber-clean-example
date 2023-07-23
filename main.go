@@ -5,40 +5,54 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-
-	"github.com/maxthizeau/gofiber-clean-boilerplate/configuration"
-	"github.com/maxthizeau/gofiber-clean-boilerplate/controller"
-	"github.com/maxthizeau/gofiber-clean-boilerplate/exception"
-	repository "github.com/maxthizeau/gofiber-clean-boilerplate/repository/impl"
-	service "github.com/maxthizeau/gofiber-clean-boilerplate/service/impl"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/config"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/configuration"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/controller"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/repository"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/service"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/database"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/exception"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/logger"
 )
 
 func main() {
 	log.Println("Work in progres...")
-	config := configuration.New()
-	database := configuration.NewDatabase(config)
+
+	configPath := "configs"
+	// 1. Load config
+	cfg, err := config.Init(configPath)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	database := database.NewDatabase(database.DatabaseConfig{
+		User:            cfg.PSQL.User,
+		Password:        cfg.PSQL.Password,
+		Host:            cfg.PSQL.Host,
+		Port:            cfg.PSQL.Port,
+		DBName:          cfg.PSQL.DBName,
+		MaxPoolOpen:     cfg.PSQL.MaxPoolOpen,
+		MaxPoolIdle:     cfg.PSQL.MaxPoolIdle,
+		MaxPollLifeTime: cfg.PSQL.MaxPollLifeTime,
+	})
 
 	// repository
-	userRepository := repository.NewUserRepositoryImpl(database)
-	questionRepository := repository.NewQuestionRepositoryImpl(database)
-	// answerRepository := repository.NewAnswerRepositoryImpl(database)
-
+	repos := repository.NewRepositories(database)
 	// service
-	userService := service.NewUserServiceImpl(&userRepository, config)
-	questionService := service.NewQuestionServiceImpl(&questionRepository)
-
+	services := service.NewServices(service.Deps{
+		Repos: repos,
+	})
 	// controller
-	userController := controller.NewUserController(&userService, config)
-	questionController := controller.NewQuestionController(&questionService, config)
+	controllers := controller.NewControllers(services)
 
 	// fiber
 	app := fiber.New(configuration.NewFiberConfiguration())
 	app.Use(recover.New())
 
 	// route
-	userController.Route(app)
-	questionController.Route(app)
+	controllers.ServeRoutes(app)
 
-	err := app.Listen(config.Get("SERVER.PORT"))
+	err = app.Listen(cfg.HTTP.Host + ":" + cfg.HTTP.Port)
 	exception.PanicLogging(err)
 }
