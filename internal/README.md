@@ -5,11 +5,11 @@
 Struct that can be used anywhere in the internal folder
 They are are representation of the database, but also the main objets of our application.
 
-# configuration
+# configuration (Todo: merge/refactor config/configuration folders)
 
 config file needed to operate the server/database
 
-# model
+# model (Todo: refactor + implement converters)
 
 Represent JSON/Data that the user can send to the API, or receive from the API.
 Incoming Data is suffixed with "Input" (ex : CreateUserInput, UpdateUserInput)
@@ -31,10 +31,10 @@ It has a file "service.go" that define all service interface, and import all dep
 
 A repository is responsible to getting, and setting data from/to the database. Functions receive an entity, and should return an entity if neeeded (and error if needed)
 
-# server
+# server (Todo)
 
 Create the server(s), apply middleware, ...
 
-# app
+# app (Todo)
 
 Connect to the database, setup repositories, services, controllers, start the server(s), the logger, the cache, ... This is what is called by main.go
