@@ -2,46 +2,82 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/entity"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/helpers"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/model"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/repository"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth/role"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/common"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/exception"
 )
 
 type questionService struct {
 	repository.QuestionRepository
+	repository.AnswerRepository
+	*auth.AuthManager
 }
 
-func NewQuestionService(questionRepository repository.QuestionRepository) *questionService {
+func NewQuestionService(questionRepository repository.QuestionRepository, answerRepository repository.AnswerRepository, authManager *auth.AuthManager) *questionService {
 	return &questionService{
 		QuestionRepository: questionRepository,
+		AnswerRepository:   answerRepository,
+		AuthManager:        authManager,
 	}
 }
 
-func (serv *questionService) Create(ctx context.Context, createQuestionModel model.CreateQuestionModel, userId uuid.UUID) entity.Question {
+func (serv *questionService) Create(ctx context.Context, createQuestionModel model.CreateQuestionInput, userId uuid.UUID) entity.Question {
 	common.Validate(createQuestionModel)
 
-	wrongAnswersEntities := []entity.Answer{}
+	answerEntities := []entity.Answer{}
 
 	for _, wrongLabel := range createQuestionModel.WrongAnswers {
-		wrongAnswersEntities = append(wrongAnswersEntities, entity.Answer{
+		answerEntities = append(answerEntities, entity.Answer{
 			Label:     wrongLabel,
 			IsCorrect: false,
 		})
 	}
+	for _, correctLabel := range createQuestionModel.CorrectAnswers {
+		answerEntities = append(answerEntities, entity.Answer{
+			Label:     correctLabel,
+			IsCorrect: true,
+		})
+	}
 
 	question, err := serv.QuestionRepository.Create(ctx, entity.Question{
-		Label:         createQuestionModel.Label,
-		CorrectAnswer: entity.Answer{Label: createQuestionModel.CorrectAnswer, IsCorrect: true},
-		WrongAnswers:  wrongAnswersEntities,
-		CreatedById:   userId,
+		Label:       createQuestionModel.Label,
+		Answers:     answerEntities,
+		CreatedById: userId,
 	})
 
 	exception.PanicLogging(err)
 
+	return question
+}
+
+func (serv *questionService) AddAnswer(ctx context.Context, questionId string, answerInput model.CreateUpdateAnswersForQuestionInput) entity.Question {
+	userContext := helpers.GetUserFromContext(ctx, serv.AuthManager)
+	question := serv.GetQuestion(ctx, questionId)
+
+	// 1. Should be the owner or at least moderator to add answer to question
+	if !userContext.Roles.Has(role.Moderator) && question.CreatedById != userContext.UserId {
+		exception.PanicUnauthorized(errors.New("you are not authorized to update this question"))
+	}
+
+	answerEntities := []entity.Answer{}
+	for _, a := range answerInput.Answers {
+		answerEntities = append(answerEntities, entity.Answer{
+			Label:      a.Label,
+			IsCorrect:  a.IsCorrect,
+			QuestionId: question.Id,
+		})
+	}
+
+	serv.AnswerRepository.CreateMany(ctx, answerEntities)
+	question = serv.GetQuestion(ctx, questionId)
 	return question
 }
 

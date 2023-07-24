@@ -30,8 +30,8 @@ func (repo *questionRepository) Create(ctx context.Context, question entity.Ques
 func (repo *questionRepository) FindById(ctx context.Context, id uuid.UUID) (entity.Question, error) {
 	var question entity.Question
 	result := repo.DB.WithContext(ctx).Table("tb_question").
-		Joins("join tb_user ON tb_question.created_by = tb_user.user_id").
-		Joins("join tb_answer ON tb_answer.question_id = tb_question.question_id").
+		// Joins("join tb_user ON tb_question.created_by = tb_user.user_id").
+		// Joins("join tb_answer ON tb_answer.question_id = tb_question.question_id").
 		Preload("CreatedBy").
 		Preload("CorrectAnswer").
 		Preload("WrongAnswers").

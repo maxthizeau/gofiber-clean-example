@@ -23,11 +23,13 @@ func NewUserRepository(DB *gorm.DB) *userRepository {
 func (repo *userRepository) Create(username string, password string, email string, roles []string) entity.User {
 	var userRoles []entity.UserRole
 
-	for _, r := range roles {
-		userRoles = append(userRoles, entity.UserRole{
-			Id:   uuid.New(),
-			Role: r,
-		})
+	if len(roles) != 0 {
+		for _, r := range roles {
+			userRoles = append(userRoles, entity.UserRole{
+				Id:   uuid.New(),
+				Role: r,
+			})
+		}
 	}
 
 	user := entity.User{
@@ -50,7 +52,7 @@ func (repo *userRepository) FindByEmail(ctx context.Context, email string) (enti
 	var userResult entity.User
 	result := repo.DB.WithContext(ctx).
 		Table("tb_user").
-		Joins("JOIN tb_user_role ON tb_user_role.user_id = tb_user.user_id").
+		// Joins("JOIN tb_user_role ON tb_user_role.user_id = tb_user.user_id").
 		Preload("UserRoles").
 		Where("email = ?", email).First(&userResult)
 

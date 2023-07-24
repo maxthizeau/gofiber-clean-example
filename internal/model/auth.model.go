@@ -1,6 +1,6 @@
 package model
 
-type AuthModel struct {
-	User  UserModel `json:"user"`
-	Token string    `json:"token"`
+type Auth struct {
+	User  User   `json:"user"`
+	Token string `json:"token"`
 }

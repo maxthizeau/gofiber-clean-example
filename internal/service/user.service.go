@@ -20,37 +20,27 @@ func NewUserService(userRepository repository.UserRepository) *userService {
 
 }
 
-func (serv *userService) FindAll(ctx context.Context) (responses []model.UserModel) {
+func (serv *userService) FindAll(ctx context.Context) (responses []entity.User) {
 	users := serv.UserRepository.FindAll(ctx)
-	for _, user := range users {
-		responses = append(responses, model.UserModel{
-			Username: user.Username,
-			Email:    user.Email,
-		})
-	}
-
-	if len(users) == 0 {
-		return []model.UserModel{}
-	}
-
+	responses = append(responses, users...)
 	return responses
 }
 
-func (serv *userService) SignUp(ctx context.Context, authModel model.UserSignupModel) entity.User {
+func (serv *userService) SignUp(ctx context.Context, authModel model.UserSignupInput) entity.User {
 
 	common.Validate(authModel)
-	roles := []string{"ADMINISTRATOR"}
+	// roles := []string{"ADMINISTRATOR"}
 
 	password, err := bcrypt.GenerateFromPassword([]byte(authModel.Password), 6)
 	exception.PanicLogging(err)
 
-	user := serv.UserRepository.Create(authModel.Username, string(password), authModel.Email, roles)
+	user := serv.UserRepository.Create(authModel.Username, string(password), authModel.Email, []string{})
 
 	return user
 
 }
 
-func (serv *userService) Authenticate(ctx context.Context, authModel model.UserLoginModel) entity.User {
+func (serv *userService) Authenticate(ctx context.Context, authModel model.UserLoginInput) entity.User {
 	common.Validate(authModel)
 	user, err := serv.UserRepository.FindByEmail(ctx, authModel.Email)
 	exception.PanicLogging(err)

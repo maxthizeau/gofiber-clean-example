@@ -5,33 +5,35 @@ import (
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/model"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth/role"
 )
 
 // Middleware JWT function
-func AuthenticateJWT(role string) func(*fiber.Ctx) error {
+func (manager *MiddlewareManager) AuthenticateJWT(askedRoles ...role.RoleEnum) func(*fiber.Ctx) error {
 	// jwtSecret := config.Get("JWT_SECRET_KEY")
 	// Todo : get from config
-	jwtSecret := "SECRET"
 
 	return jwtware.New(jwtware.Config{
-		SigningKey: []byte(jwtSecret),
+		SigningKey: []byte(manager.signingKey),
 		SuccessHandler: func(c *fiber.Ctx) error {
 			user := c.Locals("user").(*jwt.Token)
-			claims := user.Claims.(jwt.MapClaims)
-			roles, ok := claims["roles"].([]interface{})
+			jwtUser, err := manager.AuthManager.ParseJwtToken(user)
 
-			if !ok {
+			if err != nil {
 				return c.Status(fiber.StatusUnauthorized).JSON(model.GeneralResponse{
 					Code:    401,
 					Message: "Unauthorized",
 					Data:    "Undefined role",
 				})
 			}
-			// Here we could set a logger to register action made by user/role
 
-			for _, roleInterface := range roles {
-				roleMap := roleInterface.(map[string]interface{})
-				if roleMap["role"] == role {
+			if len(askedRoles) == 0 {
+				return c.Next()
+			}
+
+			// Here we could set a logger to register action made by user/role
+			for _, asked := range askedRoles {
+				if jwtUser.Roles.Has(asked) {
 					return c.Next()
 				}
 

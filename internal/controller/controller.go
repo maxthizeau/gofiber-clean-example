@@ -2,17 +2,21 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/middleware"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/service"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth"
 )
 
 type UserController struct {
 	service.UserService
-	// configuration.Config
+	Middlewares middleware.MiddlewareManager
+	Auth        auth.AuthManager
 }
 
 type QuestionController struct {
 	service.QuestionService
-	// configuration.Config
+	Middlewares middleware.MiddlewareManager
+	Auth        auth.AuthManager
 }
 
 type Controllers struct {
@@ -20,10 +24,10 @@ type Controllers struct {
 	QuestionController
 }
 
-func NewControllers(services *service.Services) *Controllers {
+func NewControllers(services *service.Services, middlewareManager middleware.MiddlewareManager, authManager auth.AuthManager) *Controllers {
 	return &Controllers{
-		UserController:     *NewUserController(&services.UserService),
-		QuestionController: *NewQuestionController(&services.QuestionService),
+		UserController:     *NewUserController(&services.UserService, authManager),
+		QuestionController: *NewQuestionController(&services.QuestionService, middlewareManager, authManager),
 	}
 }
 

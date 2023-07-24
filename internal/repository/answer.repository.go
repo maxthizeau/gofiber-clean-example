@@ -31,13 +31,18 @@ func (repo *answerRepository) CreateMany(ctx context.Context, answers []entity.A
 	return answers
 }
 
+func (repo *answerRepository) Update(ctx context.Context, answer entity.Answer) entity.Answer {
+	err := repo.DB.WithContext(ctx).Where("answer_id = ?", answer.Id).Updates(&answer)
+	exception.PanicLogging(err)
+	return answer
+}
+
 func (repo *answerRepository) FindById(ctx context.Context, id string) (entity.Answer, error) {
 
 	var answer entity.Answer
 
 	result := repo.DB.WithContext(ctx).
 		Table("tb_answer").
-		Joins("join tb_question on tb_question.question_id = tb_answer.question_id").
 		Preload("Question").
 		Where("answer_id = ?", id).
 		First(&answer)

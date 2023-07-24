@@ -6,19 +6,21 @@ import (
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/model"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/service"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth/role"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/exception"
 )
 
-func NewUserController(userService *service.UserService) *UserController {
-	return &UserController{UserService: *userService}
+func NewUserController(userService *service.UserService, authManager auth.AuthManager) *UserController {
+	return &UserController{UserService: *userService, Auth: authManager}
+
 }
 
 func (controller UserController) generateTokenForUser(user entity.User) string {
-	roles := []string{}
+	roles := role.RolesList{}
 	for _, r := range user.UserRoles {
-		roles = append(roles, r.Role)
+		roles = append(roles, role.RoleEnum(r.Role))
 	}
-	return auth.GenerateJwtToken(user.Id, roles, "SECRET", 60)
+	return controller.Auth.GenerateJwtToken(user.Id, roles)
 }
 
 func (controller UserController) Route(app *fiber.App) {
@@ -28,55 +30,41 @@ func (controller UserController) Route(app *fiber.App) {
 }
 
 func (controller UserController) SignUp(c *fiber.Ctx) error {
-	var request model.UserSignupModel
+	var request model.UserSignupInput
 	err := c.BodyParser(&request)
 	exception.PanicLogging(err)
 
 	user := controller.UserService.SignUp(c.Context(), request)
 
-	result := model.AuthModel{
-		User: model.UserModel{
-			Username: user.Username,
-			Email:    user.Email,
-		},
+	result := model.Auth{
+		User:  model.NewUserFromEntity(user),
 		Token: controller.generateTokenForUser(user),
 	}
 
-	return c.Status(fiber.StatusOK).JSON(model.GeneralResponse{
-		Code:    200,
-		Message: "Success",
-		Data:    result,
-	})
+	response := model.NewSuccessResponse(result)
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 func (controller UserController) Authenticate(c *fiber.Ctx) error {
-	var request model.UserLoginModel
+	var request model.UserLoginInput
 
 	err := c.BodyParser(&request)
 	exception.PanicLogging(err)
 
 	user := controller.UserService.Authenticate(c.Context(), request)
 
-	result := model.AuthModel{
-		User: model.UserModel{
-			Username: user.Username,
-			Email:    user.Email,
-		},
+	result := model.Auth{
+		User:  model.NewUserFromEntity(user),
 		Token: controller.generateTokenForUser(user),
 	}
 
-	return c.Status(200).JSON(model.GeneralResponse{
-		Code:    200,
-		Message: "Success",
-		Data:    result,
-	})
+	response := model.NewSuccessResponse(result)
+	return c.Status(200).JSON(response)
 }
 
 func (controller UserController) FindAll(c *fiber.Ctx) error {
 	result := controller.UserService.FindAll(c.Context())
-	return c.Status(200).JSON(model.GeneralResponse{
-		Code:    200,
-		Message: "Success",
-		Data:    result,
-	})
+	response := model.NewSuccessResponse(result)
+	return c.Status(200).JSON(response)
 }

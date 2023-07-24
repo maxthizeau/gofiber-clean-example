@@ -49,9 +49,5 @@ func NewDatabase(config DatabaseConfig) *gorm.DB {
 
 	log.Println("Connected to the database successfully")
 
-	// log.Println("Running Migrations...")
-	// err = db.AutoMigrate(&entity.User{}, &entity.Question{}, &entity.Answer{}, &entity.Game{}, &entity.UserRole{})
-	// exception.PanicLogging(err)
-
 	return db
 }
