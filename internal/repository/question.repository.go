@@ -7,6 +7,7 @@ import (
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/entity"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/exception"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type questionRepository struct {
@@ -20,6 +21,8 @@ func NewQuestionRepository(DB *gorm.DB) *questionRepository {
 }
 
 func (repo *questionRepository) Create(ctx context.Context, question entity.Question) (entity.Question, error) {
+
+	question.Id = uuid.New()
 	err := repo.DB.WithContext(ctx).Create(&question).Error
 	exception.PanicLogging(err)
 
@@ -30,11 +33,8 @@ func (repo *questionRepository) Create(ctx context.Context, question entity.Ques
 func (repo *questionRepository) FindById(ctx context.Context, id uuid.UUID) (entity.Question, error) {
 	var question entity.Question
 	result := repo.DB.WithContext(ctx).Table("tb_question").
-		// Joins("join tb_user ON tb_question.created_by = tb_user.user_id").
-		// Joins("join tb_answer ON tb_answer.question_id = tb_question.question_id").
 		Preload("CreatedBy").
-		Preload("CorrectAnswer").
-		Preload("WrongAnswers").
+		Preload("Answers").
 		Where("tb_question.question_id = ?", id).First(&question)
 
 	if result.RowsAffected == 0 {
@@ -43,4 +43,15 @@ func (repo *questionRepository) FindById(ctx context.Context, id uuid.UUID) (ent
 
 	return question, nil
 
+}
+
+func (repo *questionRepository) FindRandomQuestionsIds(ctx context.Context, count int) []entity.Question {
+	var questions []entity.Question
+	repo.DB.WithContext(ctx).Table("tb_question").
+		Order(clause.Expr{SQL: "RAND()"}).
+		Preload("CreatedBy").
+		Preload("Answers").
+		Limit(count).Find(&questions)
+
+	return questions
 }

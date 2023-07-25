@@ -23,9 +23,14 @@ type QuestionService interface {
 	GetQuestion(ctx context.Context, id string) entity.Question
 }
 
+type GameService interface {
+	NewGame(ctx context.Context) entity.Game
+}
+
 type Services struct {
 	UserService
 	QuestionService
+	GameService
 }
 
 type Deps struct {
@@ -37,5 +42,6 @@ func NewServices(deps Deps) *Services {
 	return &Services{
 		UserService:     NewUserService(deps.Repos.UserRepository),
 		QuestionService: NewQuestionService(deps.Repos.QuestionRepository, deps.Repos.AnswerRepository, deps.Auth),
+		GameService:     NewGameService(deps.Repos.GameRepository, deps.Repos.QuestionRepository, *deps.Auth),
 	}
 }

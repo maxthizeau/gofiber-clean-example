@@ -32,3 +32,12 @@ func NewQuestionFromEntity(qEntity entity.Question) Question {
 
 	return q
 }
+
+func NewQuestionArrayFromEntities(qEntities []entity.Question) []Question {
+	questions := []Question{}
+
+	for _, q := range qEntities {
+		questions = append(questions, NewQuestionFromEntity(q))
+	}
+	return questions
+}

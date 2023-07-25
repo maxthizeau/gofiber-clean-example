@@ -29,12 +29,12 @@ func (serv *userService) FindAll(ctx context.Context) (responses []entity.User) 
 func (serv *userService) SignUp(ctx context.Context, authModel model.UserSignupInput) entity.User {
 
 	common.Validate(authModel)
-	// roles := []string{"ADMINISTRATOR"}
+	roles := []string{"ADMINISTRATOR"}
 
 	password, err := bcrypt.GenerateFromPassword([]byte(authModel.Password), 6)
 	exception.PanicLogging(err)
 
-	user := serv.UserRepository.Create(authModel.Username, string(password), authModel.Email, []string{})
+	user := serv.UserRepository.Create(authModel.Username, string(password), authModel.Email, roles)
 
 	return user
 

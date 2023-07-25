@@ -18,6 +18,7 @@ type UserRepository interface {
 type QuestionRepository interface {
 	Create(ctx context.Context, question entity.Question) (entity.Question, error)
 	FindById(ctx context.Context, id uuid.UUID) (entity.Question, error)
+	FindRandomQuestionsIds(ctx context.Context, count int) []entity.Question
 }
 
 type AnswerRepository interface {
@@ -26,11 +27,18 @@ type AnswerRepository interface {
 	FindById(ctx context.Context, id string) (entity.Answer, error)
 	FindByQuestionId(ctx context.Context, questionId string) ([]entity.Answer, error)
 }
+type GameRepository interface {
+	Create(ctx context.Context, game entity.Game) entity.Game
+	Update(ctx context.Context, game entity.Game) entity.Game
+	FindById(ctx context.Context, gameId uuid.UUID) (entity.Game, error)
+	FindByPlayerId(ctx context.Context, playerId uuid.UUID) ([]entity.Game, error)
+}
 
 type Repositories struct {
 	UserRepository
 	QuestionRepository
 	AnswerRepository
+	GameRepository
 }
 
 func NewRepositories(db *gorm.DB) *Repositories {
@@ -38,5 +46,6 @@ func NewRepositories(db *gorm.DB) *Repositories {
 		UserRepository:     NewUserRepository(db),
 		QuestionRepository: NewQuestionRepository(db),
 		AnswerRepository:   NewAnswerRepository(db),
+		GameRepository:     NewGameRepository(db),
 	}
 }

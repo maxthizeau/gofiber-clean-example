@@ -30,3 +30,12 @@ func NewUserFromEntity(userEntity entity.User) User {
 	u.Username = userEntity.Username
 	return u
 }
+func NewUserArrayFromEntities(userEntities []entity.User) []User {
+	var users []User
+
+	for _, u := range userEntities {
+		users = append(users, NewUserFromEntity(u))
+	}
+
+	return users
+}

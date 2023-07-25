@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/entity"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/exception"
 	"gorm.io/gorm"
@@ -20,12 +21,18 @@ func NewAnswerRepository(DB *gorm.DB) *answerRepository {
 }
 
 func (repo *answerRepository) Create(ctx context.Context, answer entity.Answer) entity.Answer {
+	answer.Id = uuid.New()
 	err := repo.DB.WithContext(ctx).Create(&answer).Error
 	exception.PanicLogging(err)
 	return answer
 }
 
 func (repo *answerRepository) CreateMany(ctx context.Context, answers []entity.Answer) []entity.Answer {
+
+	for i := range answers {
+		answers[i].Id = uuid.New()
+	}
+
 	err := repo.DB.WithContext(ctx).Create(&answers).Error
 	exception.PanicLogging(err)
 	return answers
