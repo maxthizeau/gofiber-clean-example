@@ -48,7 +48,6 @@ func (repo *gameRepository) FindById(ctx context.Context, gameId uuid.UUID) (ent
 
 	result := repo.DB.WithContext(ctx).
 		Table("tb_game").
-		// Preload("Players").
 		Preload("Questions.Answers").
 		Preload("Questions.CreatedBy").
 		Preload(clause.Associations).

@@ -40,7 +40,8 @@ func main() {
 	})
 
 	logger.Info("Running Migrations...")
-	err = database.AutoMigrate(&entity.User{}, &entity.Question{}, &entity.Answer{}, &entity.Game{}, &entity.UserRole{})
+
+	err = database.AutoMigrate(&entity.User{}, &entity.Question{}, &entity.Answer{}, &entity.Game{}, &entity.UserRole{}, &entity.Vote{})
 	exception.PanicLogging(err)
 
 	// deps

@@ -33,12 +33,16 @@ type GameRepository interface {
 	FindById(ctx context.Context, gameId uuid.UUID) (entity.Game, error)
 	FindByPlayerId(ctx context.Context, playerId uuid.UUID) ([]entity.Game, error)
 }
+type VoteRepository interface {
+	Create(ctx context.Context, vote entity.Vote) entity.Vote
+}
 
 type Repositories struct {
 	UserRepository
 	QuestionRepository
 	AnswerRepository
 	GameRepository
+	VoteRepository
 }
 
 func NewRepositories(db *gorm.DB) *Repositories {
@@ -47,5 +51,6 @@ func NewRepositories(db *gorm.DB) *Repositories {
 		QuestionRepository: NewQuestionRepository(db),
 		AnswerRepository:   NewAnswerRepository(db),
 		GameRepository:     NewGameRepository(db),
+		VoteRepository:     NewVoteRepository(db),
 	}
 }

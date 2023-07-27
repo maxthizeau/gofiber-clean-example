@@ -6,10 +6,13 @@ import (
 )
 
 type Question struct {
-	Id        uuid.UUID `json:"question_id"`
-	Label     string    `json:"label"`
-	CreatedBy User      `json:"created_by"`
-	Answers   []Answer  `json:"answers"`
+	Id         uuid.UUID `json:"question_id"`
+	Label      string    `json:"label"`
+	CreatedBy  User      `json:"created_by"`
+	Answers    []Answer  `json:"answers"`
+	VoteCount  int       `json:"vote_count"`
+	VoteSum    int       `json:"vote_sum"`
+	Difficulty int       `json:"difficulty"`
 }
 
 type CreateQuestionInput struct {
@@ -29,6 +32,9 @@ func NewQuestionFromEntity(qEntity entity.Question) Question {
 	q.Label = qEntity.Label
 	q.CreatedBy = NewUserFromEntity(qEntity.CreatedBy)
 	q.Answers = NewAnswerArrayFromEntities(qEntity.Answers)
+	q.VoteCount = qEntity.VoteCount
+	q.VoteSum = qEntity.VoteSum
+	q.Difficulty = qEntity.Difficulty
 
 	return q
 }

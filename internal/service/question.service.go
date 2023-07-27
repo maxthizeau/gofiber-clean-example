@@ -18,13 +18,15 @@ import (
 type questionService struct {
 	repository.QuestionRepository
 	repository.AnswerRepository
+	repository.VoteRepository
 	*auth.AuthManager
 }
 
-func NewQuestionService(questionRepository repository.QuestionRepository, answerRepository repository.AnswerRepository, authManager *auth.AuthManager) *questionService {
+func NewQuestionService(questionRepository repository.QuestionRepository, answerRepository repository.AnswerRepository, voteRepository repository.VoteRepository, authManager *auth.AuthManager) *questionService {
 	return &questionService{
 		QuestionRepository: questionRepository,
 		AnswerRepository:   answerRepository,
+		VoteRepository:     voteRepository,
 		AuthManager:        authManager,
 	}
 }
@@ -88,4 +90,14 @@ func (serv *questionService) GetQuestion(ctx context.Context, id string) entity.
 	exception.PanicLogging(err)
 
 	return question
+}
+
+func (serv *questionService) VoteForQuestion(ctx context.Context, questionId string, value int8) {
+	userContext := helpers.GetUserFromContext(ctx, serv.AuthManager)
+	serv.VoteRepository.Create(ctx, entity.Vote{
+		Value:      value,
+		QuestionId: uuid.MustParse(questionId),
+		UserId:     userContext.UserId,
+	})
+
 }
