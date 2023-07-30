@@ -1,8 +1,10 @@
-# Env var
-.env
+# dev dir
 .vscode
 __debug_bin
+tmp
 
+# Env var
+.env
 
 # Psql local database
 data

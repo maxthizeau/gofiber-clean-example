@@ -1,0 +1,379 @@
+basePath: /v1/api/
+definitions:
+  common.ValidationResponse:
+    properties:
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+  controller.questionVoteInput:
+    properties:
+      negative:
+        type: boolean
+    type: object
+  model.Answer:
+    properties:
+      answer_id:
+        type: string
+      is_correct:
+        type: boolean
+      label:
+        type: string
+      question_id:
+        type: string
+    type: object
+  model.Auth:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
+  model.CreateQuestionInput:
+    properties:
+      correct_answers:
+        items:
+          type: string
+        type: array
+      label:
+        type: string
+      wrong_answers:
+        items:
+          type: string
+        type: array
+    required:
+    - correct_answers
+    - label
+    - wrong_answers
+    type: object
+  model.Game:
+    properties:
+      game_id:
+        type: string
+      players:
+        items:
+          $ref: '#/definitions/model.User'
+        type: array
+      questions:
+        items:
+          $ref: '#/definitions/model.Question'
+        type: array
+    type: object
+  model.GeneralResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  model.Question:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/model.Answer'
+        type: array
+      created_by:
+        $ref: '#/definitions/model.User'
+      difficulty:
+        type: integer
+      label:
+        type: string
+      question_id:
+        type: string
+      vote_count:
+        type: integer
+      vote_sum:
+        type: integer
+    type: object
+  model.User:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+    type: object
+  model.UserLoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  model.UserSignupInput:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        maxLength: 30
+        minLength: 4
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: REST API for creating quiz
+  title: GoQuizz Swagger API
+  version: "1.0"
+paths:
+  /create-game:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        User can create a game, wait for his friends to join (JoinGame), and start the game.
+        Access restricted to: USER
+      parameters:
+      - description: 'todo: game parameters'
+        in: body
+        name: input
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Game'
+              type: object
+      security:
+      - Bearer: []
+      summary: Create a new game
+      tags:
+      - game
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Verify provided credentials and return JWT token + user associated
+      parameters:
+      - description: sign in info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserLoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Auth'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/common.ValidationResponse'
+                  type: array
+              type: object
+      summary: User Login
+      tags:
+      - user
+  /question:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create a new question, associated to the current user
+        Access restricted to: ADMIN
+      parameters:
+      - description: question and answers info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateQuestionInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Question'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/common.ValidationResponse'
+                  type: array
+              type: object
+      security:
+      - Bearer: []
+      summary: Create a question
+      tags:
+      - question
+  /question/{id}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Get a question by ID
+        Access restricted to: USER
+      parameters:
+      - description: question id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Question'
+              type: object
+      security:
+      - Bearer: []
+      summary: Get a question by ID
+      tags:
+      - question
+  /question/{id}/vote:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        User can upvote/downvote a question. Downvote are done by passing the "negative" prop in the request body.
+        It will upsert the vote -> Creating if user/question relation does not exist, update it otherwise.
+        Access restricted to: USER
+      parameters:
+      - description: question id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: question vote info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controller.questionVoteInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - Bearer: []
+      summary: User vote for a question
+      tags:
+      - question
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Verify the Authorization token, refresh it if valid, return null
+        user otherwise
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Auth'
+              type: object
+      summary: User Refresh
+      tags:
+      - user
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Create user and return JWT token + user associated
+      parameters:
+      - description: sign up info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserSignupInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Auth'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/common.ValidationResponse'
+                  type: array
+              type: object
+      summary: User Sign up
+      tags:
+      - user
+schemes:
+- http
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    scopes:
+      admin: ' Grants full read and write access'
+      mod: ' Grants partial read and write access'
+      user: ' Only access/update his data'
+    type: apiKey
+swagger: "2.0"

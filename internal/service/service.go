@@ -16,6 +16,7 @@ type UserService interface {
 	FindAll(ctx context.Context) (responses []entity.User)
 	SignUp(ctx context.Context, authModel model.UserSignupInput) entity.User
 	Authenticate(ctx context.Context, authModel model.UserLoginInput) entity.User
+	FindLoggedUsed(ctx context.Context) entity.User
 }
 
 type QuestionService interface {
@@ -41,7 +42,7 @@ type Deps struct {
 
 func NewServices(deps Deps) *Services {
 	return &Services{
-		UserService:     NewUserService(deps.Repos.UserRepository),
+		UserService:     NewUserService(deps.Repos.UserRepository, deps.Auth),
 		QuestionService: NewQuestionService(deps.Repos.QuestionRepository, deps.Repos.AnswerRepository, deps.Repos.VoteRepository, deps.Auth),
 		GameService:     NewGameService(deps.Repos.GameRepository, deps.Repos.QuestionRepository, *deps.Auth),
 	}

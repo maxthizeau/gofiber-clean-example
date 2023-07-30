@@ -20,6 +20,7 @@ const (
 	defaultLimiterBurst           = 2
 	defaultLimiterTTL             = 10 * time.Minute
 	defaultVerificationCodeLength = 8
+	frontendUrl                   = "http://localhost:5173"
 
 	EnvLocal = "local"
 	Prod     = "prod"
@@ -31,6 +32,7 @@ type (
 		PSQL        PSQLConfig
 		HTTP        HTTPConfig
 		Auth        AuthConfig
+		Frontend    FrontendConfig
 		// FileStorage FileStorageConfig
 		// Email       EmailConfig
 		// Payment     PaymentConfig
@@ -49,6 +51,10 @@ type (
 		MaxPoolOpen     int
 		MaxPoolIdle     int
 		MaxPollLifeTime int
+	}
+
+	FrontendConfig struct {
+		Url string `mapstructure:"url"`
 	}
 
 	AuthConfig struct {
@@ -90,6 +96,7 @@ func Init(configsDir string) (*Config, error) {
 
 	fmt.Println(cfg.PSQL)
 	fmt.Println(cfg.HTTP)
+	fmt.Println(cfg.Frontend)
 
 	return &cfg, nil
 }
@@ -101,6 +108,10 @@ func unmarshal(cfg *Config) error {
 	}
 
 	if err := viper.UnmarshalKey("auth", &cfg.Auth.JWT); err != nil {
+		return err
+	}
+
+	if err := viper.UnmarshalKey("frontend", &cfg.Frontend); err != nil {
 		return err
 	}
 
@@ -144,6 +155,7 @@ func setFromEnv(cfg *Config) {
 	cfg.HTTP.Host = os.Getenv("HTTP_HOST")
 
 	cfg.Environment = os.Getenv("APP_ENV")
+
 }
 
 func parseConfigFile(folder, env string) error {
@@ -174,4 +186,5 @@ func populateDefaults() {
 	viper.SetDefault("limiter.rps", defaultLimiterRPS)
 	viper.SetDefault("limiter.burst", defaultLimiterBurst)
 	viper.SetDefault("limiter.ttl", defaultLimiterTTL)
+	viper.SetDefault("frontend.url", frontendUrl)
 }

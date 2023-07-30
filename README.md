@@ -42,3 +42,9 @@ This API manage a quizz app (the frontend repo will come later).
   - A question has a label, a good answer, and a minimum of 1 (and max 10) wrong answers, has a field CreatedBy (user)
 - Vote :
   - Relation between a User and a Question - Type Upvote/Downvote
+
+# Docs
+
+Generate the doc :
+
+    swag init --parseDependency

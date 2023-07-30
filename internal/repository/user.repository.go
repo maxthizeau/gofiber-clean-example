@@ -70,7 +70,7 @@ func (repo *userRepository) FindById(ctx context.Context, id uuid.UUID) (entity.
 		Table("tb_user").
 		Joins("JOIN tb_user_role ON tb_user_role.user_id = tb_user.user_id").
 		Preload("UserRoles").
-		Where("user_id = ?", id).First(&userResult)
+		Where("tb_user.user_id = ?", id).First(&userResult)
 
 	if result.RowsAffected == 0 {
 		return entity.User{}, errors.New("user not found")

@@ -31,7 +31,7 @@ type Controllers struct {
 
 func NewControllers(services *service.Services, middlewareManager middleware.MiddlewareManager, authManager auth.AuthManager) *Controllers {
 	return &Controllers{
-		UserController:     *NewUserController(&services.UserService, authManager),
+		UserController:     *NewUserController(&services.UserService, middlewareManager, authManager),
 		QuestionController: *NewQuestionController(&services.QuestionService, middlewareManager, authManager),
 		GameController:     *NewGameController(&services.GameService, middlewareManager),
 	}

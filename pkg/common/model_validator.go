@@ -7,6 +7,11 @@ import (
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/exception"
 )
 
+type ValidationResponse struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+}
+
 func Validate(modelInterface interface{}) {
 	validate := validator.New()
 

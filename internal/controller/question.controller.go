@@ -24,9 +24,21 @@ func (controller QuestionController) Route(app *fiber.App) {
 	app.Post("/v1/api/question", controller.Middlewares.AuthenticateJWT("ADMINISTRATOR"), controller.Create)
 	app.Post("/v1/api/question/:id/add-answers", controller.Middlewares.AuthenticateJWT(), controller.Create)
 	app.Get("/v1/api/question/:id", controller.Middlewares.AuthenticateJWT(), controller.GetQuestion)
-	app.Post("/v1/api/question/:id/vote", controller.Middlewares.AuthenticateJWT(), controller.Vote)
+	app.Put("/v1/api/question/:id/vote", controller.Middlewares.AuthenticateJWT(), controller.Vote)
 }
 
+// @Summary Create a question
+// @Tags question
+// @Description Create a new question, associated to the current user
+// @Description Access restricted to: ADMIN
+// @ModuleID Create
+// @Accept  json
+// @Produce  json
+// @Param input body model.CreateQuestionInput true "question and answers info"
+// @Success 200 {object} model.GeneralResponse{data=model.Question}
+// @Failure 400 {object} model.GeneralResponse{data=[]common.ValidationResponse}
+// @Router /question [post]
+// @Security Bearer
 func (controller QuestionController) Create(c *fiber.Ctx) error {
 	var request model.CreateQuestionInput
 	token := c.Locals("user")
@@ -45,6 +57,17 @@ func (controller QuestionController) Create(c *fiber.Ctx) error {
 
 }
 
+// @Summary Get a question by ID
+// @Tags question
+// @Description Get a question by ID
+// @Description Access restricted to: USER
+// @ModuleID GetQuestion
+// @Accept  json
+// @Produce  json
+// @Param id path string true "question id"
+// @Success 200 {object} model.GeneralResponse{data=model.Question}
+// @Router /question/{id} [get]
+// @Security Bearer
 func (controller QuestionController) GetQuestion(c *fiber.Ctx) error {
 
 	id := c.Params("id")
@@ -55,13 +78,23 @@ func (controller QuestionController) GetQuestion(c *fiber.Ctx) error {
 
 }
 
+// @Summary User vote for a question
+// @Tags question
+// @Description User can upvote/downvote a question. Downvote are done by passing the "negative" prop in the request body.
+// @Description It will upsert the vote -> Creating if user/question relation does not exist, update it otherwise.
+// @Description Access restricted to: USER
+// @ModuleID Vote
+// @Accept  json
+// @Produce  json
+// @Param id  path  string  true "question id"
+// @Param input  body  questionVoteInput  true "question vote info"
+// @Success 200 {object} model.GeneralResponse{data=string}
+// @Router /question/{id}/vote [put]
+// @Security Bearer
 func (controller QuestionController) Vote(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	type QuestionVoteInput struct {
-		Negative bool `json:"negative"`
-	}
-	var request QuestionVoteInput
+	var request questionVoteInput
 	err := c.BodyParser(&request)
 	exception.PanicValidation(err)
 
@@ -71,4 +104,8 @@ func (controller QuestionController) Vote(c *fiber.Ctx) error {
 
 	controller.QuestionService.VoteForQuestion(c.Context(), id, value)
 	return c.Status(fiber.StatusOK).JSON(model.NewSuccessResponse("Vote saved"))
+}
+
+type questionVoteInput struct {
+	Negative bool `json:"negative"`
 }
