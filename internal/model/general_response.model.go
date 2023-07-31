@@ -1,9 +1,9 @@
 package model
 
 type GeneralResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Code    int         `json:"code" binding:"required"`
+	Message string      `json:"message" binding:"required"`
+	Data    interface{} `json:"data" binding:"required"`
 }
 
 /*

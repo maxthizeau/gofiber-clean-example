@@ -12,7 +12,48 @@
     "host": "localhost:8000",
     "basePath": "/v1/api/",
     "paths": {
-        "/create-game": {
+        "/game": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all games for current user\nAccess restricted to: USER (as a player) or ADMIN",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Get all games for current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.GeneralResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.Game"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -54,6 +95,294 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/model.Game"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/game/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get a game by ID\nAccess restricted to: USER",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Get a game by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "game Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.GeneralResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Game"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/game/{id}/answer": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "User can answer a question in a game if the game is started and the question is not already answered.\nAccess restricted to: USER",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Answer a question in a game",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "game Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "question Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "todo: answer info",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/game/{id}/join": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "User can join an existing game if not already a player of it, and if the game is not started.\nAccess restricted to: USER",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Join an existing game",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "game Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.GeneralResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Game"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/game/{id}/result": {
+            "get": {
+                "description": "Get a game result by game ID\nAccess restricted to: USER",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Get a game result by game ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "game Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.GeneralResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.GameResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/game/{id}/start": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "One of the players can start an existing game if game is not already started.\nAccess restricted to: USER",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Start an existing game",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "game Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.GeneralResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Game"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/game/{id}/status": {
+            "get": {
+                "description": "Get a game status by game ID\nAccess not restricted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Get a game status by game ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "game Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.GeneralResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.GameStatus"
                                         }
                                     }
                                 }
@@ -432,8 +761,27 @@
                 }
             }
         },
+        "entity.GameStatus": {
+            "type": "string",
+            "enum": [
+                "created",
+                "started",
+                "ended"
+            ],
+            "x-enum-varnames": [
+                "GameStatusCreated",
+                "GameStatusStarted",
+                "GameStatusEnded"
+            ]
+        },
         "model.Answer": {
             "type": "object",
+            "required": [
+                "answer_id",
+                "is_correct",
+                "label",
+                "question_id"
+            ],
             "properties": {
                 "answer_id": {
                     "type": "string"
@@ -487,7 +835,20 @@
         },
         "model.Game": {
             "type": "object",
+            "required": [
+                "created_at",
+                "game_id",
+                "players",
+                "questions",
+                "status"
+            ],
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
                 "game_id": {
                     "type": "string"
                 },
@@ -502,11 +863,86 @@
                     "items": {
                         "$ref": "#/definitions/model.Question"
                     }
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.GameStatus"
+                }
+            }
+        },
+        "model.GameResult": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "game_id",
+                "players",
+                "question_results",
+                "questions",
+                "status"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "game_id": {
+                    "type": "string"
+                },
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.User"
+                    }
+                },
+                "question_results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QuestionResult"
+                    }
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Question"
+                    }
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.GameStatus"
+                }
+            }
+        },
+        "model.GameStatus": {
+            "type": "object",
+            "required": [
+                "exists",
+                "is_user_in_game"
+            ],
+            "properties": {
+                "exists": {
+                    "type": "boolean"
+                },
+                "is_user_in_game": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.GameStatus"
                 }
             }
         },
         "model.GeneralResponse": {
             "type": "object",
+            "required": [
+                "code",
+                "data",
+                "message"
+            ],
             "properties": {
                 "code": {
                     "type": "integer"
@@ -519,6 +955,14 @@
         },
         "model.Question": {
             "type": "object",
+            "required": [
+                "answers",
+                "difficulty",
+                "label",
+                "question_id",
+                "vote_count",
+                "vote_sum"
+            ],
             "properties": {
                 "answers": {
                     "type": "array",
@@ -546,13 +990,90 @@
                 }
             }
         },
+        "model.QuestionResult": {
+            "type": "object",
+            "required": [
+                "answers",
+                "difficulty",
+                "label",
+                "question_id",
+                "vote_count",
+                "vote_sum"
+            ],
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Answer"
+                    }
+                },
+                "created_by": {
+                    "$ref": "#/definitions/model.User"
+                },
+                "difficulty": {
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "question_id": {
+                    "type": "string"
+                },
+                "user_answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.UserAnswer"
+                    }
+                },
+                "vote_count": {
+                    "type": "integer"
+                },
+                "vote_sum": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.User": {
             "type": "object",
+            "required": [
+                "username"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UserAnswer": {
+            "type": "object",
+            "required": [
+                "question_id",
+                "user_answer_id",
+                "user_id"
+            ],
+            "properties": {
+                "answer": {
+                    "$ref": "#/definitions/model.Answer"
+                },
+                "game_id": {
+                    "type": "string"
+                },
+                "is_correct": {
+                    "type": "boolean"
+                },
+                "question_id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "user_answer_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

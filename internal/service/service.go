@@ -27,6 +27,13 @@ type QuestionService interface {
 
 type GameService interface {
 	NewGame(ctx context.Context) entity.Game
+	JoinGame(ctx context.Context, gameId uuid.UUID) entity.Game
+	StartGame(ctx context.Context, gameId uuid.UUID) entity.Game
+	GetGame(ctx context.Context, gameId uuid.UUID) entity.Game
+	GetGamesForCurrentUser(ctx context.Context) []entity.Game
+	GetGameResults(ctx context.Context, gameId uuid.UUID) (entity.Game, []entity.UserAnswer)
+	GetGameStatus(ctx context.Context, gameId uuid.UUID) model.GameStatus
+	AnswerQuestionInGame(ctx context.Context, userAnswer entity.UserAnswer) error
 }
 
 type Services struct {
@@ -44,6 +51,6 @@ func NewServices(deps Deps) *Services {
 	return &Services{
 		UserService:     NewUserService(deps.Repos.UserRepository, deps.Auth),
 		QuestionService: NewQuestionService(deps.Repos.QuestionRepository, deps.Repos.AnswerRepository, deps.Repos.VoteRepository, deps.Auth),
-		GameService:     NewGameService(deps.Repos.GameRepository, deps.Repos.QuestionRepository, *deps.Auth),
+		GameService:     NewGameService(deps.Repos.GameRepository, deps.Repos.QuestionRepository, deps.Repos.UserAnswerRepository, *deps.Auth),
 	}
 }

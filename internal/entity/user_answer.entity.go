@@ -15,6 +15,8 @@ type UserAnswer struct {
 	User          *User `gorm:"ForeignKey:UserRefer;constraint:OnUpdate:CASCADE,ONDELETE:SET NULL;"`
 	QuestionRefer *uuid.UUID
 	Question      *Question `gorm:"ForeignKey:QuestionRefer;"`
+	GameRefer     *uuid.UUID
+	Game          *Game     `gorm:"ForeignKey:GameRefer;"`
 	IsCorrect     bool      `gorm:"column:is_correct;default:null"` // null = correction not done yet
 	CreatedAt     time.Time `gorm:"column:created_at"`
 }

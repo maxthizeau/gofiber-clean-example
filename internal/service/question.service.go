@@ -61,7 +61,10 @@ func (serv *questionService) Create(ctx context.Context, createQuestionModel mod
 }
 
 func (serv *questionService) AddAnswer(ctx context.Context, questionId string, answerInput model.CreateUpdateAnswersForQuestionInput) entity.Question {
-	userContext := helpers.GetUserFromContext(ctx, serv.AuthManager)
+	userContext, err := helpers.GetUserFromContext(ctx, serv.AuthManager)
+	if err != nil {
+		exception.PanicUnauthorized(errors.New("user not logged in"))
+	}
 	question := serv.GetQuestion(ctx, questionId)
 
 	// 1. Should be the owner or at least moderator to add answer to question
@@ -93,7 +96,10 @@ func (serv *questionService) GetQuestion(ctx context.Context, id string) entity.
 }
 
 func (serv *questionService) VoteForQuestion(ctx context.Context, questionId string, value int8) {
-	userContext := helpers.GetUserFromContext(ctx, serv.AuthManager)
+	userContext, err := helpers.GetUserFromContext(ctx, serv.AuthManager)
+	if err != nil {
+		exception.PanicUnauthorized(errors.New("user not logged in"))
+	}
 	serv.VoteRepository.Create(ctx, entity.Vote{
 		Value:      value,
 		QuestionId: uuid.MustParse(questionId),

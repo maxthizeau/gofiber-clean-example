@@ -62,7 +62,7 @@ func (serv *userService) Authenticate(ctx context.Context, authModel model.UserL
 }
 
 func (serv *userService) FindLoggedUsed(ctx context.Context) entity.User {
-	userContext := helpers.GetUserFromContext(ctx, serv.AuthManager)
+	userContext, _ := helpers.GetUserFromContext(ctx, serv.AuthManager)
 	user, err := serv.UserRepository.FindById(ctx, userContext.UserId)
 	exception.PanicUnauthorized(err)
 	return user

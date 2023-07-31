@@ -6,13 +6,18 @@ import (
 )
 
 type Question struct {
-	Id         uuid.UUID `json:"question_id"`
-	Label      string    `json:"label"`
+	Id         uuid.UUID `json:"question_id" binding:"required"`
+	Label      string    `json:"label" binding:"required"`
 	CreatedBy  User      `json:"created_by"`
-	Answers    []Answer  `json:"answers"`
-	VoteCount  int       `json:"vote_count"`
-	VoteSum    int       `json:"vote_sum"`
-	Difficulty int       `json:"difficulty"`
+	Answers    []Answer  `json:"answers" binding:"required"`
+	VoteCount  int       `json:"vote_count" binding:"required"`
+	VoteSum    int       `json:"vote_sum" binding:"required"`
+	Difficulty int       `json:"difficulty" binding:"required"`
+}
+
+type QuestionResult struct {
+	Question
+	UserAnswers []UserAnswer `json:"user_answers"`
 }
 
 type CreateQuestionInput struct {
@@ -25,6 +30,7 @@ type CreateUpdateAnswersForQuestionInput struct {
 	Answers []CreateUpdateAnswerInput `json:"answers" validate:"required,gt=0"`
 }
 
+// Question
 func NewQuestionFromEntity(qEntity entity.Question) Question {
 	var q Question
 
@@ -46,4 +52,26 @@ func NewQuestionArrayFromEntities(qEntities []entity.Question) []Question {
 		questions = append(questions, NewQuestionFromEntity(q))
 	}
 	return questions
+}
+
+// QuestionResult
+func NewQuestionResultFromEntity(qEntity entity.Question, userAnswers []entity.UserAnswer) QuestionResult {
+	var q Question = NewQuestionFromEntity(qEntity)
+
+	qResult := QuestionResult{
+		Question:    q,
+		UserAnswers: NewUserAnswerArrayFromEntities(userAnswers),
+	}
+
+	return qResult
+}
+
+func NewQuestionResultArrayFromEntities(qEntities []entity.Question, userAnswers []entity.UserAnswer) []QuestionResult {
+	qResults := []QuestionResult{}
+
+	for _, q := range qEntities {
+		qResults = append(qResults, NewQuestionResultFromEntity(q, userAnswers))
+	}
+
+	return qResults
 }

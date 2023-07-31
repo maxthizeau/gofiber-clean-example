@@ -12,6 +12,16 @@ definitions:
       negative:
         type: boolean
     type: object
+  entity.GameStatus:
+    enum:
+    - created
+    - started
+    - ended
+    type: string
+    x-enum-varnames:
+    - GameStatusCreated
+    - GameStatusStarted
+    - GameStatusEnded
   model.Answer:
     properties:
       answer_id:
@@ -22,6 +32,11 @@ definitions:
         type: string
       question_id:
         type: string
+    required:
+    - answer_id
+    - is_correct
+    - label
+    - question_id
     type: object
   model.Auth:
     properties:
@@ -49,6 +64,10 @@ definitions:
     type: object
   model.Game:
     properties:
+      created_at:
+        type: string
+      end_at:
+        type: string
       game_id:
         type: string
       players:
@@ -59,6 +78,60 @@ definitions:
         items:
           $ref: '#/definitions/model.Question'
         type: array
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/entity.GameStatus'
+    required:
+    - created_at
+    - game_id
+    - players
+    - questions
+    - status
+    type: object
+  model.GameResult:
+    properties:
+      created_at:
+        type: string
+      end_at:
+        type: string
+      game_id:
+        type: string
+      players:
+        items:
+          $ref: '#/definitions/model.User'
+        type: array
+      question_results:
+        items:
+          $ref: '#/definitions/model.QuestionResult'
+        type: array
+      questions:
+        items:
+          $ref: '#/definitions/model.Question'
+        type: array
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/entity.GameStatus'
+    required:
+    - created_at
+    - game_id
+    - players
+    - question_results
+    - questions
+    - status
+    type: object
+  model.GameStatus:
+    properties:
+      exists:
+        type: boolean
+      is_user_in_game:
+        type: boolean
+      status:
+        $ref: '#/definitions/entity.GameStatus'
+    required:
+    - exists
+    - is_user_in_game
     type: object
   model.GeneralResponse:
     properties:
@@ -67,6 +140,10 @@ definitions:
       data: {}
       message:
         type: string
+    required:
+    - code
+    - data
+    - message
     type: object
   model.Question:
     properties:
@@ -86,6 +163,43 @@ definitions:
         type: integer
       vote_sum:
         type: integer
+    required:
+    - answers
+    - difficulty
+    - label
+    - question_id
+    - vote_count
+    - vote_sum
+    type: object
+  model.QuestionResult:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/model.Answer'
+        type: array
+      created_by:
+        $ref: '#/definitions/model.User'
+      difficulty:
+        type: integer
+      label:
+        type: string
+      question_id:
+        type: string
+      user_answers:
+        items:
+          $ref: '#/definitions/model.UserAnswer'
+        type: array
+      vote_count:
+        type: integer
+      vote_sum:
+        type: integer
+    required:
+    - answers
+    - difficulty
+    - label
+    - question_id
+    - vote_count
+    - vote_sum
     type: object
   model.User:
     properties:
@@ -93,6 +207,29 @@ definitions:
         type: string
       username:
         type: string
+    required:
+    - username
+    type: object
+  model.UserAnswer:
+    properties:
+      answer:
+        $ref: '#/definitions/model.Answer'
+      game_id:
+        type: string
+      is_correct:
+        type: boolean
+      question_id:
+        type: string
+      text:
+        type: string
+      user_answer_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - question_id
+    - user_answer_id
+    - user_id
     type: object
   model.UserLoginInput:
     properties:
@@ -128,7 +265,32 @@ info:
   title: GoQuizz Swagger API
   version: "1.0"
 paths:
-  /create-game:
+  /game:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Get all games for current user
+        Access restricted to: USER (as a player) or ADMIN
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.Game'
+                  type: array
+              type: object
+      security:
+      - Bearer: []
+      summary: Get all games for current user
+      tags:
+      - game
     post:
       consumes:
       - application/json
@@ -157,6 +319,188 @@ paths:
       security:
       - Bearer: []
       summary: Create a new game
+      tags:
+      - game
+  /game/{id}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Get a game by ID
+        Access restricted to: USER
+      parameters:
+      - description: game Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Game'
+              type: object
+      security:
+      - Bearer: []
+      summary: Get a game by ID
+      tags:
+      - game
+  /game/{id}/answer:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        User can answer a question in a game if the game is started and the question is not already answered.
+        Access restricted to: USER
+      parameters:
+      - description: game Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: question Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'todo: answer info'
+        in: body
+        name: input
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Answer a question in a game
+      tags:
+      - game
+  /game/{id}/join:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        User can join an existing game if not already a player of it, and if the game is not started.
+        Access restricted to: USER
+      parameters:
+      - description: game Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Game'
+              type: object
+      security:
+      - Bearer: []
+      summary: Join an existing game
+      tags:
+      - game
+  /game/{id}/result:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Get a game result by game ID
+        Access restricted to: USER
+      parameters:
+      - description: game Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.GameResult'
+              type: object
+      summary: Get a game result by game ID
+      tags:
+      - game
+  /game/{id}/start:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        One of the players can start an existing game if game is not already started.
+        Access restricted to: USER
+      parameters:
+      - description: game Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Game'
+              type: object
+      security:
+      - Bearer: []
+      summary: Start an existing game
+      tags:
+      - game
+  /game/{id}/status:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Get a game status by game ID
+        Access not restricted
+      parameters:
+      - description: game Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GeneralResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.GameStatus'
+              type: object
+      summary: Get a game status by game ID
       tags:
       - game
   /login:

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -9,6 +10,7 @@ import (
 	"github.com/gofiber/swagger"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/config"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/controller"
+	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/entity"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/middleware"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/repository"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/service"
@@ -59,9 +61,9 @@ func main() {
 		MaxPollLifeTime: cfg.PSQL.MaxPollLifeTime,
 	})
 
-	// logger.Info("Running Migrations...")
-	// err = database.AutoMigrate(&entity.User{}, &entity.Question{}, &entity.Answer{}, &entity.Game{}, &entity.UserRole{}, &entity.Vote{})
-	// exception.PanicLogging(err)
+	logger.Info("Running Migrations...")
+	err = database.AutoMigrate(&entity.User{}, &entity.Question{}, &entity.Answer{}, &entity.Game{}, &entity.UserRole{}, &entity.Vote{}, &entity.UserAnswer{})
+	exception.PanicLogging(err)
 
 	// deps
 	authManager := auth.NewAuthManager(cfg.Auth.JWT.SigningKey, cfg.Auth.JWT.AccessTokenTTL)
@@ -82,13 +84,16 @@ func main() {
 	// fiber
 	app := fiber.New(config.NewFiberConfiguration())
 	app.Use(recover.New())
-
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: cfg.Frontend.Url,
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 		AllowMethods: "GET, POST, HEAD, PUT, DELETE, PATCH, OPTIONS",
 	}))
-
+	// simulate slow network
+	app.Use(func(c *fiber.Ctx) error {
+		time.Sleep(1 * time.Second)
+		return c.Next()
+	})
 	// route
 	controllers.ServeRoutes(app)
 

@@ -38,7 +38,7 @@ func (repo *gameRepository) Create(ctx context.Context, game entity.Game) entity
 }
 
 func (repo *gameRepository) Update(ctx context.Context, game entity.Game) entity.Game {
-	err := repo.DB.WithContext(ctx).Where("game_id = ?", game.Id).Updates(&game)
+	err := repo.DB.WithContext(ctx).Where("game_id = ?", game.Id).Updates(&game).Error
 	exception.PanicLogging(err)
 	return game
 }
@@ -64,9 +64,11 @@ func (repo *gameRepository) FindByPlayerId(ctx context.Context, playerId uuid.UU
 	var games []entity.Game
 
 	repo.DB.WithContext(ctx).
-		Model(&games).
-		Preload("Players").
-		Preload("Questions").
+		Table("tb_game").
+		Joins("JOIN user_games ON user_games.game_id = tb_game.game_id").
+		Preload("Questions.Answers").
+		Preload("Questions.CreatedBy").
+		Preload(clause.Associations).
 		Where("user_games.user_id = ?", playerId).
 		Find(&games)
 

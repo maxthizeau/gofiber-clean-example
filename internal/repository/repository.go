@@ -37,20 +37,28 @@ type VoteRepository interface {
 	Create(ctx context.Context, vote entity.Vote) entity.Vote
 }
 
+type UserAnswerRepository interface {
+	Create(ctx context.Context, userAnswer entity.UserAnswer) entity.UserAnswer
+	FindByGameId(ctx context.Context, gameId uuid.UUID) ([]entity.UserAnswer, error)
+	FindByUserAndGameId(ctx context.Context, userId uuid.UUID, gameId uuid.UUID) ([]entity.UserAnswer, error)
+}
+
 type Repositories struct {
 	UserRepository
 	QuestionRepository
 	AnswerRepository
 	GameRepository
 	VoteRepository
+	UserAnswerRepository
 }
 
 func NewRepositories(db *gorm.DB) *Repositories {
 	return &Repositories{
-		UserRepository:     NewUserRepository(db),
-		QuestionRepository: NewQuestionRepository(db),
-		AnswerRepository:   NewAnswerRepository(db),
-		GameRepository:     NewGameRepository(db),
-		VoteRepository:     NewVoteRepository(db),
+		UserRepository:       NewUserRepository(db),
+		QuestionRepository:   NewQuestionRepository(db),
+		AnswerRepository:     NewAnswerRepository(db),
+		GameRepository:       NewGameRepository(db),
+		VoteRepository:       NewVoteRepository(db),
+		UserAnswerRepository: NewUserAnswerRepository(db),
 	}
 }

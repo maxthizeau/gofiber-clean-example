@@ -4,7 +4,7 @@ import "github.com/maxthizeau/gofiber-clean-boilerplate/internal/entity"
 
 type (
 	User struct {
-		Username string `json:"username"`
+		Username string `json:"username" binding:"required"`
 		Email    string `json:"email"`
 	}
 

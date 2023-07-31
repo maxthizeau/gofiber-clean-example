@@ -7,14 +7,28 @@ import (
 
 type (
 	Answer struct {
-		Id         uuid.UUID `json:"answer_id"`
-		Label      string    `json:"label"`
-		QuestionId uuid.UUID `json:"question_id"`
+		Id         uuid.UUID `json:"answer_id" binding:"required"`
+		Label      string    `json:"label" binding:"required"`
+		QuestionId uuid.UUID `json:"question_id" binding:"required"`
+		IsCorrect  bool      `json:"is_correct" binding:"required"`
+	}
+	UserAnswer struct {
+		Id         uuid.UUID `json:"user_answer_id" binding:"required"`
+		Answer     Answer    `json:"answer"`
 		IsCorrect  bool      `json:"is_correct"`
+		Text       string    `json:"text"`
+		QuestionId uuid.UUID `json:"question_id" binding:"required"`
+		UserId     uuid.UUID `json:"user_id" binding:"required"`
+		GameId     uuid.UUID `json:"game_id"`
 	}
 	CreateUpdateAnswerInput struct {
 		Label     string `json:"label" validate:"required"`
 		IsCorrect bool   `json:"is_correct" validate:"required"`
+	}
+	CreateUserAnswerInput struct {
+		AnswerId   uuid.UUID `json:"answer_id"`
+		Text       string    `json:"text"`
+		QuestionId uuid.UUID `json:"question_id" validate:"required"`
 	}
 )
 
@@ -48,4 +62,25 @@ func NewAnswerArrayFromEntities(entities []entity.Answer) []Answer {
 		answers = append(answers, NewAnswerFromEntity(entity))
 	}
 	return answers
+}
+
+// UserAnswer
+func NewUserAnswerFromEntity(userAnswer entity.UserAnswer) UserAnswer {
+	return UserAnswer{
+		Id:         userAnswer.Id,
+		Answer:     NewAnswerFromEntity(userAnswer.Answer),
+		IsCorrect:  userAnswer.IsCorrect,
+		Text:       userAnswer.Text,
+		QuestionId: *userAnswer.QuestionRefer,
+		UserId:     *userAnswer.UserRefer,
+		GameId:     *userAnswer.GameRefer,
+	}
+}
+
+func NewUserAnswerArrayFromEntities(userAnswers []entity.UserAnswer) []UserAnswer {
+	userAnswersModel := []UserAnswer{}
+	for _, userAnswer := range userAnswers {
+		userAnswersModel = append(userAnswersModel, NewUserAnswerFromEntity(userAnswer))
+	}
+	return userAnswersModel
 }
