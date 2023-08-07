@@ -1,14 +1,13 @@
 package middleware
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth"
-	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth/role"
 )
 
-type middlewareManager interface {
-	AuthenticateJWT(askedRoles ...role.RoleEnum) func(*fiber.Ctx) error
-}
+// type middlewareManager interface {
+// 	AuthenticateJWT(askedRoles ...role.RoleEnum) func(*fiber.Ctx) error
+// 	PopulateJWT() func(*fiber.Ctx) error
+// }
 
 type MiddlewareManager struct {
 	*auth.AuthManager

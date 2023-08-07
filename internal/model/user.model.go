@@ -4,6 +4,7 @@ import "github.com/maxthizeau/gofiber-clean-boilerplate/internal/entity"
 
 type (
 	User struct {
+		Id       string `json:"user_id" binding:"required"`
 		Username string `json:"username" binding:"required"`
 		Email    string `json:"email"`
 	}
@@ -26,6 +27,7 @@ type UserModel interface {
 
 func NewUserFromEntity(userEntity entity.User) User {
 	var u User
+	u.Id = userEntity.Id.String()
 	u.Email = userEntity.Email
 	u.Username = userEntity.Username
 	return u

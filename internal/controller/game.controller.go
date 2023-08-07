@@ -81,7 +81,12 @@ func (controller GameController) GetGameResult(c *fiber.Ctx) error {
 		exception.PanicBadRequest(errors.New("invalid game id - verify your link"))
 	}
 	game, userAnswers := controller.GameService.GetGameResults(c.Context(), id)
-	questionResults := model.NewQuestionResultArrayFromEntities(game.Questions, userAnswers)
+	questionResults := model.NewQuestionResultArrayFromEntities(game.Questions, []entity.UserAnswer{})
+
+	for i, q := range questionResults {
+		newAnswers := entity.UserAnswersOfQuestionId(userAnswers, q.Id)
+		questionResults[i].UserAnswers = model.NewUserAnswerArrayFromEntities(newAnswers)
+	}
 
 	response := model.NewSuccessResponse(model.NewGameResultFromEntity(game, questionResults))
 	return c.Status(fiber.StatusOK).JSON(response)

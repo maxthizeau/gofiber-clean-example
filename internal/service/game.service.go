@@ -106,7 +106,7 @@ func (serv *gameService) StartGame(ctx context.Context, gameId uuid.UUID) entity
 	}
 
 	foundGame.StartedAt = time.Now()
-	foundGame.EndAt = time.Now().Add(time.Minute * 5)
+	foundGame.EndAt = time.Now().Add(time.Minute * 1)
 
 	foundGame = serv.GameRepository.Update(ctx, foundGame)
 
@@ -176,7 +176,12 @@ func (serv *gameService) GetGameResults(ctx context.Context, gameId uuid.UUID) (
 	}
 
 	userAnswers, err := serv.UserAnswerRepository.FindByGameId(ctx, gameId)
+
 	exception.PanicNotFound(err)
+
+	for i, userAnswer := range userAnswers {
+		userAnswers[i].IsCorrect = userAnswer.IsCorrectAnswer()
+	}
 
 	return foundGame, userAnswers
 }

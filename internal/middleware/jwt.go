@@ -8,6 +8,24 @@ import (
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/auth/role"
 )
 
+func (manager *MiddlewareManager) PopulateJWT() func(*fiber.Ctx) error {
+	return jwtware.New(jwtware.Config{
+		SigningKey: []byte(manager.signingKey),
+		SuccessHandler: func(c *fiber.Ctx) error {
+			user := c.Locals("user").(*jwt.Token)
+			jwtUser, err := manager.AuthManager.ParseJwtToken(user)
+
+			if err != nil {
+				c.Locals("jwtUser", jwtUser)
+			}
+			return c.Next()
+		},
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Next()
+		}})
+
+}
+
 // Middleware JWT function
 func (manager *MiddlewareManager) AuthenticateJWT(askedRoles ...role.RoleEnum) func(*fiber.Ctx) error {
 	// jwtSecret := config.Get("JWT_SECRET_KEY")

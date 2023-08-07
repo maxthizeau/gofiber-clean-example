@@ -1,4 +1,6 @@
-Boilerplate for creating an API using clean architecture.
+Test of API using clean architecture.
+
+Frontend : [https://github.com/maxthizeau/goquiz-front](https://github.com/maxthizeau/goquiz-front)
 
 Using :
 
@@ -48,3 +50,11 @@ This API manage a quizz app (the frontend repo will come later).
 Generate the doc :
 
     swag init --parseDependency
+
+# Status of the project
+
+This project has been renamed from "gofiber-clean-boilerplate" to "gofiber-clean-example", because it's not rly a Boilerplate and there is still much work to be done in order to have a fully functionnal Boilerplate.
+
+This project won't be updated anymore.
+
+#

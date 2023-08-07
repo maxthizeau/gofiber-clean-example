@@ -89,6 +89,7 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 		AllowMethods: "GET, POST, HEAD, PUT, DELETE, PATCH, OPTIONS",
 	}))
+	app.Use(middlewares.PopulateJWT())
 	// simulate slow network
 	app.Use(func(c *fiber.Ctx) error {
 		time.Sleep(1 * time.Second)

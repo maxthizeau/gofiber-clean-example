@@ -205,9 +205,12 @@ definitions:
     properties:
       email:
         type: string
+      user_id:
+        type: string
       username:
         type: string
     required:
+    - user_id
     - username
     type: object
   model.UserAnswer:

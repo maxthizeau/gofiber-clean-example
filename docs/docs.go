@@ -1040,10 +1040,14 @@ const docTemplate = `{
         "model.User": {
             "type": "object",
             "required": [
+                "user_id",
                 "username"
             ],
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 },
                 "username": {

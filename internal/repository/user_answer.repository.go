@@ -7,6 +7,7 @@ import (
 	"github.com/maxthizeau/gofiber-clean-boilerplate/internal/entity"
 	"github.com/maxthizeau/gofiber-clean-boilerplate/pkg/exception"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type userAnswerRepository struct {
@@ -21,7 +22,10 @@ func NewUserAnswerRepository(DB *gorm.DB) *userAnswerRepository {
 
 func (repo *userAnswerRepository) Create(ctx context.Context, userAnswer entity.UserAnswer) entity.UserAnswer {
 	userAnswer.Id = uuid.New()
-	err := repo.DB.WithContext(ctx).Create(&userAnswer).Error
+	err := repo.DB.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "user_refer"}, {Name: "question_refer"}, {Name: "game_refer"}}, // key colume
+		DoUpdates: clause.AssignmentColumns([]string{"text", "answer_refer", "created_at"}),              // column needed to be updated
+	}).Create(&userAnswer).Error
 
 	exception.PanicLogging(err)
 	return userAnswer
